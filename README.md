@@ -21,3 +21,13 @@ docker-compose up --build
 ```link
 http://localhost:8000/api/docs/
 ```
+
+## 4  Api docs
+Create admin
+```bash
+docker exec -it mamacare-store-backend-1 python manage.py createsuperuser
+```
+
+```link
+http://localhost:8000/admin/
+```
