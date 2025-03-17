@@ -16,7 +16,7 @@ This file contains instructions for setting up and running the project.
 docker-compose up --build
 ```
 
-## 3. Api docs 
+## 3. Api docs
 
 ```link
 http://localhost:8000/api/docs/
