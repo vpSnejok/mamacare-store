@@ -1,46 +1,13 @@
 from django.db import connection
 from rest_framework.generics import (CreateAPIView)
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.tokens import RefreshToken, OutstandingToken, BlacklistedToken
 from rest_framework.views import APIView
 from .serializers import EmailRegistrationSerializer, PhoneRegistrationSerializer
 
-
-# class BaseRegistrationView(CreateAPIView):
-#     permission_classes = [AllowAny]
-#
-#     def create(self, request, *args, **kwargs):
-#         serializer = self.get_serializer(data=request.data)
-#         if serializer.is_valid():
-#             user = serializer.save()
-#
-#             refresh = RefreshToken.for_user(user)
-#             access_token = str(refresh.access_token)
-#
-#             user_data = {
-#                 "username": user.username,
-#                 "email": user.email,
-#                 "first_name": user.first_name,
-#                 "last_name": user.last_name,
-#             }
-#
-#             return Response({
-#                 "user": user_data,
-#                 "access_token": access_token,
-#                 "refresh_token": str(refresh),
-#             }, status=status.HTTP_201_CREATED)
-#
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#
-#
-# class EmailRegistrationView(BaseRegistrationView):
-#     serializer_class = EmailRegistrationSerializer
-#
-#
-# class PhoneRegistrationView(BaseRegistrationView):
-#     serializer_class = PhoneRegistrationSerializer
 
 class EmailRegistrationView(CreateAPIView):
     serializer_class = EmailRegistrationSerializer
@@ -103,6 +70,39 @@ class PhoneRegistrationView(CreateAPIView):
             }, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            refresh_token = request.data.get('refresh_token')
+            if refresh_token:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+                return Response({"message": "User logout"}, status=status.HTTP_205_RESET_CONTENT)
+            else:
+                return Response({"error": "Need "}, status=status.HTTP_400_BAD_REQUEST)
+        except TokenError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LogoutAllView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            # Получаем все токены пользователя
+            tokens = OutstandingToken.objects.filter(user=request.user)
+            for token in tokens:
+                # Проверяем, не заблокирован ли токен уже
+                if not BlacklistedToken.objects.filter(token=token).exists():
+                    BlacklistedToken.objects.create(token=token)
+
+            return Response({"message": "Успешный выход из всех устройств"}, status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class DatabaseConnectionCheckView(APIView):
