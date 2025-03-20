@@ -25,7 +25,7 @@ http://localhost:8000/api/docs/
 ## 4  Api docs
 Create admin
 ```bash
-docker exec mamacare-store-backend-1 python manage.py createsuperuser
+docker compose exec backend python manage.py createsuperuser
 ```
 
 ```link
