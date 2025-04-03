@@ -1,0 +1,12 @@
+**/.git
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.mo
+**/*.db
+**/*.css.map
+**/*.egg-info
+**/.env
+**/.venv
+venv/
+.env
