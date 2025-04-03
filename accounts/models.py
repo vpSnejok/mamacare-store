@@ -12,7 +12,7 @@ phone_validator = RegexValidator(
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
-            raise ValueError('Email обязателен')
+            raise ValueError('Email is required')
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
@@ -27,8 +27,8 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True, verbose_name='Email')
-    first_name = models.CharField(max_length=30, blank=True, verbose_name='First Name')
-    last_name = models.CharField(max_length=30, blank=True, verbose_name='Last Name')
+    first_name = models.CharField(max_length=30, blank=True, null=True, verbose_name='First Name')
+    last_name = models.CharField(max_length=30, blank=True, null=True, verbose_name='Last Name')
     phone = models.CharField(
         max_length=20,
         blank=True,
@@ -69,11 +69,3 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     class Meta:
         verbose_name = 'User'
         verbose_name_plural = 'Users'
-
-
-class TestModel(models.Model):
-    name = models.CharField(max_length=100)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.name

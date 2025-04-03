@@ -5,7 +5,7 @@ from rest_framework import status, serializers
 from rest_framework.response import Response
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import SignUpSerializer, SignInSerializer, LogoutSerializer, ChangePasswordSerializer
+from .serializers import RegisterSerializer, LoginSerializer, LogoutSerializer, ChangePasswordSerializer
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -17,8 +17,8 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'email', 'first_name', 'last_name', 'phone', 'address']
 
 
-class SignUpView(CreateAPIView):
-    serializer_class = SignUpSerializer
+class RegisterView(CreateAPIView):
+    serializer_class = RegisterSerializer
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -38,11 +38,11 @@ class SignUpView(CreateAPIView):
         }, status=status.HTTP_201_CREATED)
 
 
-class SignInView(APIView):
-    serializer_class = SignInSerializer
+class LoginView(APIView):
+    serializer_class = LoginSerializer
 
     def post(self, request):
-        serializer = SignInSerializer(data=request.data)
+        serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         user = serializer.validated_data['user']
