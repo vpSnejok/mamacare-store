@@ -7,6 +7,7 @@ from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, Bl
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import RegisterSerializer, LoginSerializer, LogoutSerializer, ChangePasswordSerializer
 from django.contrib.auth import get_user_model
+from django.db import connection, DatabaseError
 
 User = get_user_model()
 
@@ -101,3 +102,18 @@ class LogoutAllView(APIView):
             BlacklistedToken.objects.get_or_create(token=token)
 
         return Response({'message': 'Successfully logged out from all devices'}, status=status.HTTP_205_RESET_CONTENT)
+
+
+class DatabaseHealthCheckView(APIView):
+    def get(self, request):
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT 1;")
+                result = cursor.fetchone()
+                if result and result[0] == 1:
+                    return Response({"status": "ok", "db": "connected"}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"status": "error", "db": "no response"},
+                                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except DatabaseError as e:
+            return Response({"status": "error", "db": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
