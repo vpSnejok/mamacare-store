@@ -18,5 +18,5 @@ urlpatterns = [
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
-    path('api/health-check/', DatabaseHealthCheckView.as_view(), name='db-health-check'),
+    path('health-check/', DatabaseHealthCheckView.as_view(), name='db-health-check'),
 ]
